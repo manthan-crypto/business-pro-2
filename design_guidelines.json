@@ -1,0 +1,105 @@
+{
+  "theme": "LIGHT",
+  "archetype": "4 (Swiss & High-Contrast)",
+  "typography": {
+    "font_family": "Chivo, sans-serif",
+    "headings": {
+      "strategy": "Swiss Brutalist - Radical weight contrast",
+      "h1": "text-4xl tracking-tighter font-black",
+      "h2": "text-2xl tracking-tight font-bold",
+      "h3": "text-xl tracking-tight font-bold",
+      "h4": "text-lg tracking-tight font-bold",
+      "kpi_value": "text-3xl md:text-4xl font-black tracking-tighter"
+    },
+    "body": "text-sm font-medium leading-relaxed text-slate-800",
+    "labels": "text-xs font-bold uppercase tracking-[0.2em] text-slate-500"
+  },
+  "colors": {
+    "background": "#FAFAFA",
+    "surface": "#FFFFFF",
+    "border": "#E5E7EB",
+    "text_primary": "#0A0A0A",
+    "text_secondary": "#525252",
+    "primary_brand": "#002FA7",
+    "primary_hover": "#00227A",
+    "success": "#059669",
+    "alert": "#DC2626",
+    "warning": "#D97706"
+  },
+  "layout_and_spacing": {
+    "strategy": "CONTROL ROOM Grid - Max Information Density",
+    "sidebar": "w-64 fixed h-screen border-r border-border bg-surface flex flex-col",
+    "main_content": "ml-64 p-6 md:p-8 min-h-screen bg-[#FAFAFA]",
+    "grid_system": {
+      "kpi_row": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4",
+      "chart_row": "grid grid-cols-1 lg:grid-cols-3 gap-4",
+      "data_heavy_row": "grid grid-cols-1 lg:grid-cols-12 gap-4"
+    },
+    "surface_treatment": "GRID BORDERS - Technical look. Use flat backgrounds, 1px subtle borders (border-slate-200), NO drop shadows. Border radius should be rounded-none or rounded-sm."
+  },
+  "components": {
+    "kpi_card": {
+      "container": "bg-white border border-border p-5 flex flex-col gap-3 rounded-sm",
+      "header": "flex justify-between items-start",
+      "title": "text-xs font-bold uppercase tracking-wider text-slate-500",
+      "value": "text-3xl font-black text-slate-950 leading-none",
+      "trend": "text-sm font-bold flex items-center gap-1",
+      "trend_up": "text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm",
+      "trend_down": "text-red-600 bg-red-50 px-2 py-0.5 rounded-sm"
+    },
+    "data_table": {
+      "container": "w-full border-collapse text-sm bg-white border border-border rounded-sm overflow-hidden",
+      "header_row": "border-b-2 border-slate-900 bg-slate-50",
+      "header_cell": "text-left py-3 px-4 font-bold uppercase tracking-wider text-xs text-slate-700",
+      "row": "border-b border-slate-200 hover:bg-slate-50 transition-colors",
+      "cell": "py-2.5 px-4 text-slate-800",
+      "missing_value_cell": "bg-amber-50 border border-amber-300 text-amber-900"
+    },
+    "buttons": {
+      "primary": "bg-[#002FA7] hover:bg-[#00227A] text-white px-4 py-2 text-sm font-bold transition-colors rounded-sm inline-flex items-center justify-center",
+      "secondary": "border border-slate-300 hover:border-slate-900 text-slate-900 bg-white px-4 py-2 text-sm font-bold transition-colors rounded-sm inline-flex items-center justify-center"
+    },
+    "alerts_panel": {
+      "container": "flex flex-col gap-2",
+      "alert_item": "border-l-4 border-red-600 bg-white border-y border-r border-slate-200 p-4 shadow-sm flex items-start gap-3",
+      "title": "font-bold text-slate-900 text-sm",
+      "description": "text-slate-600 text-sm mt-0.5",
+      "warning_item": "border-l-4 border-amber-500 bg-white border-y border-r border-slate-200 p-4 shadow-sm flex items-start gap-3"
+    },
+    "data_editor": {
+      "container": "bg-white border border-border rounded-sm",
+      "editable_cell": "hover:bg-blue-50 cursor-text focus-within:ring-2 focus-within:ring-inset focus-within:ring-[#002FA7]"
+    }
+  },
+  "icons": {
+    "library": "lucide-react",
+    "usage": "Use crisp, stroke-width 2 icons. Minimal scale (16px or 20px). NO emojis."
+  },
+  "interactions_and_motion": {
+    "hover_states": "Hard background color changes, no soft fades. High contrast shifts.",
+    "focus_states": "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#002FA7]"
+  },
+  "media_assets": {
+    "logo": {
+      "url": "https://images.pexels.com/photos/21898300/pexels-photo-21898300.jpeg",
+      "description": "Minimalist corporate logo black, use as brand identity placeholder in the sidebar or auth screen"
+    },
+    "auth_background": {
+      "url": "https://images.pexels.com/photos/29404570/pexels-photo-29404570.jpeg",
+      "description": "Architectural/Geometric abstract background with contrasting light for the login screen's split-panel design"
+    }
+  },
+  "accessibility_and_testing": {
+    "data_testid_requirement": "CRITICAL: All interactive and key informational elements MUST include a data-testid attribute in kebab-case representing their role.",
+    "contrast": "Ensure APCA/WCAG AA contrast for all text. The text_primary on background exceeds the 4.5:1 ratio."
+  },
+  "instructions_to_main_agent": [
+    "Build a dense 'Control Room' sidebar layout. The sidebar should be fixed width (64) with exact 1px borders.",
+    "Implement Shadcn UI components but heavily override their default classes: strip away soft drop shadows (shadow-sm/md/lg) and large border-radii. Enforce rounded-sm or rounded-none.",
+    "Use 'Chivo' font-family globally. Maximize visual tension with huge font weights (font-black) for KPI numbers and tiny tracked-out fonts (uppercase tracking-wider) for labels.",
+    "Implement the Smart Alerts dashboard panel as a stacked list of high-contrast alert cards (red/amber left borders).",
+    "For the Data Editor/Missing values functionality, highlight empty or invalid cells prominently (e.g., using amber/red backgrounds) so analysts spot data gaps instantly.",
+    "Never use transparent backgrounds over content; always use solid white or gray surfaces for clear data visibility.",
+    "Charts should use solid brand colors without excessive gradients, matching the authoritative Swiss-style design."
+  ]
+}
