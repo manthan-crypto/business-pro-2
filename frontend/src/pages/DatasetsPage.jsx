@@ -4,7 +4,7 @@ import { SectionTitle, Badge } from "../components/Primitives";
 import { useDatasets } from "../context/DatasetContext";
 import { CheckCircle, Trash2, Edit3, Save, X } from "lucide-react";
 
-const CANONICAL = ["invoice_no", "invoice_date", "customer", "product", "category", "manufacturer", "qty", "rate", "cost_price", "gp_pct", "gp_amount", "net_amount", "salesperson", "country", "area", "mode"];
+const CANONICAL = ["invoice_no", "invoice_date", "customer", "product", "category", "manufacturer", "qty", "rate", "cost_price", "gp_pct", "gp_amount", "net_amount", "salesperson", "country", "area", "mode", "currency"];
 
 export default function DatasetsPage() {
   const { datasets, active, refresh, activate, remove } = useDatasets();

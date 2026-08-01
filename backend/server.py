@@ -28,6 +28,7 @@ from analytics import (
     country_analytics, trend_analytics, smart_alerts, salesperson_analytics,
 )
 from executive import ceo_dashboard, sales_director_dashboard, finance_dashboard
+from quarterly import quarterly_analytics
 from reports import (
     build_customer_report_excel, build_product_report_excel, build_country_report_excel,
     build_ceo_pdf, build_sales_director_pdf, build_finance_pdf,
@@ -406,6 +407,14 @@ async def executive_finance(dataset_id: Optional[str] = None, user=Depends(_user
     txs = await _get_transactions(user["id"], ds_id, merged)
     targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
     return finance_dashboard(txs, targets)
+
+
+@api.get("/analytics/quarterly")
+async def analytics_quarterly(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
+    return quarterly_analytics(txs, targets)
 
 
 # ---------- Reports Export ----------

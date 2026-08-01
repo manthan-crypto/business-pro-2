@@ -20,6 +20,7 @@ import DatasetsPage from "@/pages/DatasetsPage";
 import CeoDashboardPage from "@/pages/CeoDashboardPage";
 import SalesDirectorDashboardPage from "@/pages/SalesDirectorDashboardPage";
 import FinanceDashboardPage from "@/pages/FinanceDashboardPage";
+import QuarterlyPage from "@/pages/QuarterlyPage";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/countries" element={<CountriesPage />} />
               <Route path="/trends" element={<TrendsPage />} />
+              <Route path="/quarterly" element={<QuarterlyPage />} />
               <Route path="/salespersons" element={<SalespersonsPage />} />
               <Route path="/alerts" element={<AlertsPage />} />
               <Route path="/ceo" element={<CeoDashboardPage />} />

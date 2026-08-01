@@ -46,18 +46,25 @@ export default function FinanceDashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="sharp-card p-5" data-testid="fin-currency-wise">
-          <div className="kbd-label">Currency / Country-wise Sales</div>
-          <div className="text-lg font-black tracking-tight mt-1 mb-3">Geographic Revenue Split</div>
+          <div className="kbd-label">{data.has_currency_field ? "Currency-wise Sales" : "Country-wise Sales (currency proxy)"}</div>
+          <div className="text-lg font-black tracking-tight mt-1 mb-3">
+            {data.has_currency_field ? "Explicit Currency Split" : "Geographic Revenue Split"}
+          </div>
           <div className="overflow-y-auto max-h-96 scrollbar-thin">
             <table className="dense-table w-full">
-              <thead><tr><th>Country</th><th className="text-right">Sales</th><th className="text-right">GP</th><th className="text-right">Margin</th></tr></thead>
+              <thead><tr><th>{data.has_currency_field ? "Currency" : "Country"}</th><th className="text-right">Sales</th><th className="text-right">GP</th><th className="text-right">Margin</th></tr></thead>
               <tbody>
                 {data.currency_wise.slice(0, 20).map((c) => (
-                  <tr key={c.country}><td className="font-bold text-xs">{c.country}</td><td className="mono text-right">{fmtINR(c.sales)}</td><td className="mono text-right">{fmtINR(c.gp)}</td><td className="mono text-right">{fmtPct(c.gp_pct)}</td></tr>
+                  <tr key={c.currency}><td className="font-bold text-xs">{c.currency}</td><td className="mono text-right">{fmtINR(c.sales)}</td><td className="mono text-right">{fmtINR(c.gp)}</td><td className="mono text-right">{fmtPct(c.gp_pct)}</td></tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {!data.has_currency_field && (
+            <div className="mt-3 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 px-3 py-2">
+              Tip: Add a <span className="mono font-bold">Currency</span> column to your Excel (or map it in the Datasets page) to see true currency-wise breakdowns.
+            </div>
+          )}
         </div>
 
         <div className="sharp-card p-5" data-testid="fin-credit-exposure">

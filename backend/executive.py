@@ -78,24 +78,33 @@ def finance_dashboard(txs: List[dict], targets: List[dict] = None) -> Dict[str, 
     country = country_analytics(txs)
     cust = customer_analytics(txs)
 
-    # Currency proxy = country grouping (since data has country/city; can be extended when currency field added)
-    by_country_gp = defaultdict(lambda: {"sales": 0.0, "gp": 0.0})
+    # Explicit currency-wise grouping (if currency field mapped). Falls back to country.
+    by_currency = defaultdict(lambda: {"sales": 0.0, "gp": 0.0, "orders": set(), "customers": set()})
+    has_currency = any(t.get("currency") for t in txs)
     for t in txs:
-        c = t.get("country")
-        if not c:
-            continue
-        by_country_gp[c]["sales"] += _safe_float(t.get("net_amount"))
-        by_country_gp[c]["gp"] += _safe_float(t.get("gp_amount"))
+        if has_currency:
+            key = (t.get("currency") or "UNSPECIFIED").upper()
+        else:
+            key = t.get("country") or "UNSPECIFIED"
+        e = by_currency[key]
+        e["sales"] += _safe_float(t.get("net_amount"))
+        e["gp"] += _safe_float(t.get("gp_amount"))
+        if t.get("invoice_no"):
+            e["orders"].add(t.get("invoice_no"))
+        if t.get("customer"):
+            e["customers"].add(t.get("customer"))
 
     currency_wise = sorted(
         [
             {
-                "country": k,
+                "currency": k,
                 "sales": round(v["sales"], 2),
                 "gp": round(v["gp"], 2),
                 "gp_pct": round(v["gp"] / v["sales"] * 100, 2) if v["sales"] else 0,
+                "orders": len(v["orders"]),
+                "customers": len(v["customers"]),
             }
-            for k, v in by_country_gp.items()
+            for k, v in by_currency.items()
         ],
         key=lambda x: x["sales"], reverse=True,
     )
@@ -135,6 +144,7 @@ def finance_dashboard(txs: List[dict], targets: List[dict] = None) -> Dict[str, 
             "gp_pct": ov["gp_pct"],
             "orders": ov["orders"],
         },
+        "has_currency_field": has_currency,
         "currency_wise": currency_wise,
         "top_credit_exposure": credit_exposure,
         "low_gp_customers": low_gp,

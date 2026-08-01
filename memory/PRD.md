@@ -61,3 +61,17 @@ Build a Sales MIS app that ingests Excel of customer-wise / product-wise / month
 - Uploaded VIPL_CUSTOMER_TOP_5.xls → 193 synthetic rows (from monthly summary format)
 - Uploaded outward.xls (8,563 rows) → merged view shows ₹53 Cr total sales, 8,566 orders
 - All PDF/Excel exports return 200 with valid bytes (Excel 22-186 KB, PDF 4-7 KB)
+
+## Update — Quarterly Business Review + Currency Field (2026-08-01)
+
+### Added
+- **QBR (Quarterly Business Review) page**: New `/quarterly` route with fiscal-year (Apr–Mar) grouping
+  - FY tabs (auto-detected from data range)
+  - Per-FY KPIs (sales, GP, orders, active customers, target achievement)
+  - Four Q-cards (Q1 Apr-Jun, Q2 Jul-Sep, Q3 Oct-Dec, Q4 Jan-Mar) with QoQ + YoY growth, GP%, AOV, target achievement
+  - Cross-FY trend chart + detailed table
+  - Endpoint: `GET /api/analytics/quarterly?dataset_id=[all|<id>]`
+- **Currency canonical field**: Added `currency` to `CANONICAL_FIELDS` (aliases: currency/curr/ccy/cur/fcy)
+  - Auto-detected from Excel columns; manually mappable via Datasets page
+  - Finance dashboard automatically switches from "Country-wise (proxy)" to true "Currency-wise" grouping when the field is mapped
+  - Helpful tip banner shown when currency field is not detected

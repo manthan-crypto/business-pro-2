@@ -196,7 +196,7 @@ def build_finance_pdf(fin: Dict[str, Any]) -> bytes:
         ["GP Margin", _fmt_pct(k["gp_pct"])],
         ["Orders", _fmt_num(k["orders"])],
     ]
-    cur_rows = [[c["country"][:30], _fmt_inr(c["sales"]), _fmt_inr(c["gp"]), _fmt_pct(c["gp_pct"])] for c in fin.get("currency_wise", [])[:15]]
+    cur_rows = [[c.get("currency", c.get("country", ""))[:30], _fmt_inr(c["sales"]), _fmt_inr(c["gp"]), _fmt_pct(c["gp_pct"])] for c in fin.get("currency_wise", [])[:15]]
     ce_rows = [[c["customer"][:35], _fmt_inr(c["sales"]), _fmt_pct(c["contribution_pct"])] for c in fin.get("top_credit_exposure", [])]
     lgp_rows = [[c["customer"][:35], _fmt_inr(c["sales"]), _fmt_pct(c["gp_pct"])] for c in fin.get("low_gp_customers", [])]
     mode_rows = [[m["mode"], _fmt_inr(m["sales"]), _fmt_pct(m["gp_pct"]), _fmt_num(m["orders"])] for m in fin.get("payment_mode_analysis", [])]

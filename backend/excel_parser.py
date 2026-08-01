@@ -24,6 +24,7 @@ CANONICAL_FIELDS = {
     "country": ["city", "country", "nation"],
     "area": ["area", "region", "location", "p_areacity"],
     "mode": ["mode", "type", "transaction type"],
+    "currency": ["currency", "curr", "ccy", "cur", "fcy"],
 }
 
 MONTH_NAMES = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
@@ -158,6 +159,7 @@ def _summary_to_transactions(rows: List[dict], mapping: Dict[str, str], headers:
         salesperson = r.get(mapping.get("salesperson", ""))
         category = r.get(mapping.get("category", ""))
         area = r.get(mapping.get("area", ""))
+        currency = r.get(mapping.get("currency", "")) if mapping.get("currency") else None
         gp_pct_val = _to_float(r.get(mapping.get("gp_pct", "")))
         total_gp = _to_float(r.get(mapping.get("gp_amount", "")))
         total_sales = _to_float(r.get(mapping.get("net_amount", "")))
@@ -194,6 +196,7 @@ def _summary_to_transactions(rows: List[dict], mapping: Dict[str, str], headers:
                 "salesperson": (str(salesperson).strip() if salesperson else None),
                 "country": (str(country).strip() if country else None),
                 "area": (str(area).strip() if area else None),
+                "currency": (str(currency).strip() if currency else None),
                 "mode": "SUMMARY",
                 "invoice_no": f"SUM-{month_name}-{calendar_year}",
                 "invoice_date": iso_date,
