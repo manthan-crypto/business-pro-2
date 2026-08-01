@@ -4,9 +4,12 @@ import { SectionTitle, KpiCard, EmptyState, Badge } from "../components/Primitiv
 import { fmtINR, fmtNum, fmtPct } from "../lib/api";
 import { Package, Zap, Snowflake, Ban } from "lucide-react";
 import { useDatasets } from "../context/DatasetContext";
+import ExportBar from "../components/ExportBar";
+import DatasetSelector from "../components/DatasetSelector";
 
 export default function ProductsPage() {
   const { active } = useDatasets();
+  const [scope, setScope] = useState("active");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("top20");
@@ -15,8 +18,9 @@ export default function ProductsPage() {
   useEffect(() => {
     if (!active) { setLoading(false); return; }
     setLoading(true);
-    api.get("/analytics/products").then((r) => setData(r.data)).finally(() => setLoading(false));
-  }, [active?.id]);
+    const params = scope === "all" ? { dataset_id: "all" } : {};
+    api.get("/analytics/products", { params }).then((r) => setData(r.data)).finally(() => setLoading(false));
+  }, [active?.id, scope]);
 
   if (!active) return <EmptyState title="No dataset" description="Upload data to see product analytics." />;
   if (loading || !data) return <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Loading...</div>;
@@ -30,10 +34,16 @@ export default function ProductsPage() {
     { id: "slow", label: `Slow Movers (${data.slow_movers.length})` },
     { id: "zero", label: `Zero Sales (${data.zero_sales.length})` },
   ];
+  const scopeParam = scope === "all" ? "?dataset_id=all" : "";
 
   return (
     <div className="space-y-8">
-      <SectionTitle sub={`${data.total_products} unique products`}>Product Analytics</SectionTitle>
+      <SectionTitle sub={`${data.total_products} unique products`} action={
+        <div className="flex gap-2">
+          <DatasetSelector scope={scope} setScope={setScope} />
+          <ExportBar xlsxUrl={`/reports/products.xlsx${scopeParam}`} filename="products.xlsx" testid="export-products" />
+        </div>
+      }>Product Analytics</SectionTitle>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard testid="prod-kpi-total" label="Total Products" value={fmtNum(data.total_products)} icon={Package} />

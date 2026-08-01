@@ -3,25 +3,35 @@ import api from "../lib/api";
 import { SectionTitle, EmptyState } from "../components/Primitives";
 import { fmtINR, fmtNum, fmtPct } from "../lib/api";
 import { useDatasets } from "../context/DatasetContext";
+import ExportBar from "../components/ExportBar";
+import DatasetSelector from "../components/DatasetSelector";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function CountriesPage() {
   const { active } = useDatasets();
+  const [scope, setScope] = useState("active");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!active) { setLoading(false); return; }
     setLoading(true);
-    api.get("/analytics/countries").then((r) => setData(r.data)).finally(() => setLoading(false));
-  }, [active?.id]);
+    const params = scope === "all" ? { dataset_id: "all" } : {};
+    api.get("/analytics/countries", { params }).then((r) => setData(r.data)).finally(() => setLoading(false));
+  }, [active?.id, scope]);
 
   if (!active) return <EmptyState title="No dataset" description="Upload data to see country analytics." />;
   if (loading || !data) return <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Loading...</div>;
+  const scopeParam = scope === "all" ? "?dataset_id=all" : "";
 
   return (
     <div className="space-y-8">
-      <SectionTitle sub={`${data.rows.length} countries`}>Country Analytics</SectionTitle>
+      <SectionTitle sub={`${data.rows.length} countries`} action={
+        <div className="flex gap-2">
+          <DatasetSelector scope={scope} setScope={setScope} />
+          <ExportBar xlsxUrl={`/reports/countries.xlsx${scopeParam}`} filename="countries.xlsx" testid="export-countries" />
+        </div>
+      }>Country Analytics</SectionTitle>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 sharp-card p-5">

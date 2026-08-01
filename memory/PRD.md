@@ -42,3 +42,22 @@ Build a Sales MIS app that ingests Excel of customer-wise / product-wise / month
 - Currency-wise sales, credit exposure, payment terms
 - Export reports as PDF/Excel
 - Multi-file merge (transaction + customer monthly summary)
+
+## Update — Executive Dashboards + Reports + Multi-file Merge (2026-08-01)
+
+### Added
+- **Executive Dashboards** (3 new pages):
+  - CEO: KPIs, target achievement, MoM growth, top-10 concentration, monthly trend, top customers, top salespersons, growth/decline highlights, month-end forecast
+  - Sales Director: Pipeline, growth leaders/decliners, new/lost customers, top salespersons, top products, country ranking
+  - Finance: GP margins, currency (country) split, top credit exposure, low-margin customers, payment mode analysis
+- **Multi-file Merge**: Excel parser auto-detects `monthly_summary` format (APR..MAR columns) vs `transaction` format. Summary rows are exploded into 12 synthetic month-end transactions. Any page + all executive dashboards accept `dataset_id=all` to merge across ALL uploaded datasets. DatasetSelector toggle (Active/All Merged) appears when ≥2 datasets exist.
+- **Report Export**:
+  - Excel (xlsxwriter): Customers, Products, Countries multi-sheet reports
+  - PDF (reportlab): CEO, Sales Director, Finance branded landscape reports with KPI tables + top-N sections
+  - ExportBar component with PDF/Excel buttons on relevant pages
+- Sidebar reorganized into sections: OVERVIEW / ANALYTICS / EXECUTIVE / MANAGE
+
+### Verified
+- Uploaded VIPL_CUSTOMER_TOP_5.xls → 193 synthetic rows (from monthly summary format)
+- Uploaded outward.xls (8,563 rows) → merged view shows ₹53 Cr total sales, 8,566 orders
+- All PDF/Excel exports return 200 with valid bytes (Excel 22-186 KB, PDF 4-7 KB)

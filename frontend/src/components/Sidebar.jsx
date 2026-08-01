@@ -3,19 +3,27 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Upload, Users, Package, Globe, TrendingUp,
   UserCheck, Bell, Pencil, Target, LogOut, Activity, Database,
+  Crown, Compass, Wallet,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useDatasets } from "../context/DatasetContext";
 
 const NAV = [
+  { section: "OVERVIEW" },
   { to: "/", label: "Overview", icon: LayoutDashboard, testid: "nav-overview" },
   { to: "/upload", label: "Upload Data", icon: Upload, testid: "nav-upload" },
+  { section: "ANALYTICS" },
   { to: "/customers", label: "Customers", icon: Users, testid: "nav-customers" },
   { to: "/products", label: "Products", icon: Package, testid: "nav-products" },
   { to: "/countries", label: "Countries", icon: Globe, testid: "nav-countries" },
   { to: "/trends", label: "Trends", icon: TrendingUp, testid: "nav-trends" },
   { to: "/salespersons", label: "Sales Team", icon: UserCheck, testid: "nav-salespersons" },
   { to: "/alerts", label: "Smart Alerts", icon: Bell, testid: "nav-alerts" },
+  { section: "EXECUTIVE" },
+  { to: "/ceo", label: "CEO Dashboard", icon: Crown, testid: "nav-ceo" },
+  { to: "/sales-director", label: "Sales Director", icon: Compass, testid: "nav-sd" },
+  { to: "/finance", label: "Finance", icon: Wallet, testid: "nav-finance" },
+  { section: "MANAGE" },
   { to: "/data-editor", label: "Data Editor", icon: Pencil, testid: "nav-data-editor" },
   { to: "/targets", label: "Targets", icon: Target, testid: "nav-targets" },
   { to: "/datasets", label: "Datasets", icon: Database, testid: "nav-datasets" },
@@ -58,24 +66,33 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-2">
-        {NAV.map((n) => (
-          <NavLink
-            key={n.to}
-            to={n.to}
-            data-testid={n.testid}
-            end={n.to === "/"}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-5 py-2.5 text-sm font-bold transition-colors border-l-2 ${
-                isActive
-                  ? "bg-[#002FA7]/5 text-[#002FA7] border-[#002FA7]"
-                  : "text-slate-700 border-transparent hover:bg-slate-50"
-              }`
-            }
-          >
-            <n.icon className="w-4 h-4" strokeWidth={2} />
-            {n.label}
-          </NavLink>
-        ))}
+        {NAV.map((n, idx) => {
+          if (n.section) {
+            return (
+              <div key={`sec-${idx}`} className="px-5 pt-4 pb-1 text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">
+                {n.section}
+              </div>
+            );
+          }
+          return (
+            <NavLink
+              key={n.to}
+              to={n.to}
+              data-testid={n.testid}
+              end={n.to === "/"}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-5 py-2 text-sm font-bold transition-colors border-l-2 ${
+                  isActive
+                    ? "bg-[#002FA7]/5 text-[#002FA7] border-[#002FA7]"
+                    : "text-slate-700 border-transparent hover:bg-slate-50"
+                }`
+              }
+            >
+              <n.icon className="w-4 h-4" strokeWidth={2} />
+              {n.label}
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div className="px-5 py-3 border-t border-slate-200">

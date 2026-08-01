@@ -17,6 +17,10 @@ import DataEditorPage from "@/pages/DataEditorPage";
 import TargetsPage from "@/pages/TargetsPage";
 import DatasetsPage from "@/pages/DatasetsPage";
 
+import CeoDashboardPage from "@/pages/CeoDashboardPage";
+import SalesDirectorDashboardPage from "@/pages/SalesDirectorDashboardPage";
+import FinanceDashboardPage from "@/pages/FinanceDashboardPage";
+
 export default function App() {
   return (
     <div className="App">
@@ -34,6 +38,9 @@ export default function App() {
               <Route path="/trends" element={<TrendsPage />} />
               <Route path="/salespersons" element={<SalespersonsPage />} />
               <Route path="/alerts" element={<AlertsPage />} />
+              <Route path="/ceo" element={<CeoDashboardPage />} />
+              <Route path="/sales-director" element={<SalesDirectorDashboardPage />} />
+              <Route path="/finance" element={<FinanceDashboardPage />} />
               <Route path="/data-editor" element={<DataEditorPage />} />
               <Route path="/targets" element={<TargetsPage />} />
               <Route path="/datasets" element={<DatasetsPage />} />

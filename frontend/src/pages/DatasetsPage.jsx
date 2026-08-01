@@ -44,7 +44,7 @@ export default function DatasetsPage() {
                     {d.is_active && <Badge variant="success">ACTIVE</Badge>}
                   </div>
                   <div className="text-xs text-slate-500 mt-1 mono">
-                    {d.filename} · {d.row_count.toLocaleString()} rows · {d.headers.length} columns · uploaded {d.uploaded_at.split("T")[0]}
+                    {d.filename} · {d.row_count.toLocaleString()} rows · {d.headers.length} columns · {d.kind === "monthly_summary" ? "monthly summary" : "transaction"} · uploaded {d.uploaded_at.split("T")[0]}
                   </div>
                 </div>
                 <div className="flex gap-2">

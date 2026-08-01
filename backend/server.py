@@ -27,6 +27,13 @@ from analytics import (
     overview_kpis, customer_analytics, product_analytics,
     country_analytics, trend_analytics, smart_alerts, salesperson_analytics,
 )
+from executive import ceo_dashboard, sales_director_dashboard, finance_dashboard
+from reports import (
+    build_customer_report_excel, build_product_report_excel, build_country_report_excel,
+    build_ceo_pdf, build_sales_director_pdf, build_finance_pdf,
+)
+from fastapi.responses import StreamingResponse
+import io
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -85,16 +92,30 @@ async def _get_active_dataset(user_id: str) -> Optional[dict]:
     return await db.datasets.find_one({"user_id": user_id, "is_active": True})
 
 
-async def _get_transactions(user_id: str, dataset_id: Optional[str] = None) -> List[dict]:
+async def _get_transactions(user_id: str, dataset_id: Optional[str] = None, merged: bool = False) -> List[dict]:
+    """Fetch transactions. If merged=True or dataset_id='all', combine across ALL user's datasets."""
+    if merged or dataset_id == "all":
+        cursor = db.transactions.find({"user_id": user_id}, {"_id": 0})
+        return await cursor.to_list(length=None)
     ds = None
     if dataset_id:
-        ds = await db.datasets.find_one({"_id": ObjectId(dataset_id), "user_id": user_id})
+        try:
+            ds = await db.datasets.find_one({"_id": ObjectId(dataset_id), "user_id": user_id})
+        except Exception:
+            ds = None
     else:
         ds = await _get_active_dataset(user_id)
     if not ds:
         return []
     cursor = db.transactions.find({"dataset_id": str(ds["_id"])}, {"_id": 0})
     return await cursor.to_list(length=None)
+
+
+def _parse_merged_flag(dataset_id: Optional[str]) -> tuple:
+    """Return (dataset_id_or_None, merged_bool)."""
+    if dataset_id == "all" or dataset_id == "merged":
+        return None, True
+    return dataset_id, False
 
 
 # ---------- Auth Routes ----------
@@ -153,11 +174,11 @@ async def upload_dataset(
         raise HTTPException(status_code=400, detail="Only .xls or .xlsx files are supported")
     content = await file.read()
     try:
-        headers, rows, mapping, header_idx = parse_excel(content, file.filename)
+        headers, rows, mapping, header_idx, file_kind = parse_excel(content, file.filename)
     except Exception as e:
         logger.exception("Excel parse failed")
         raise HTTPException(status_code=400, detail=f"Failed to parse Excel: {e}")
-    canon = canonicalize_rows(rows, mapping)
+    canon = canonicalize_rows(rows, mapping, file_kind=file_kind, filename=file.filename, headers=headers)
 
     # Mark prior active datasets inactive
     await db.datasets.update_many({"user_id": user["id"], "is_active": True}, {"$set": {"is_active": False}})
@@ -166,6 +187,7 @@ async def upload_dataset(
         "user_id": user["id"],
         "name": name or file.filename,
         "filename": file.filename,
+        "kind": file_kind,
         "headers": headers,
         "mapping": mapping,
         "header_row": header_idx,
@@ -189,6 +211,7 @@ async def upload_dataset(
         "id": dataset_id, "name": ds_doc["name"], "filename": file.filename,
         "row_count": len(canon), "headers": headers, "mapping": mapping,
         "uploaded_at": ds_doc["uploaded_at"], "is_active": True,
+        "kind": file_kind,
         "canonical_fields": list(CANONICAL_FIELDS.keys()),
     }
 
@@ -202,6 +225,7 @@ async def list_datasets(user=Depends(_user_dep)):
             "id": str(d["_id"]), "name": d["name"], "filename": d["filename"],
             "row_count": d["row_count"], "uploaded_at": d["uploaded_at"],
             "is_active": d.get("is_active", False), "headers": d["headers"], "mapping": d["mapping"],
+            "kind": d.get("kind", "transaction"),
         })
     return out
 
@@ -235,7 +259,7 @@ async def update_mapping(dataset_id: str, req: MappingUpdateRequest, user=Depend
     cursor = db.transactions.find({"dataset_id": dataset_id})
     txs = await cursor.to_list(length=None)
     rows = [t["raw"] for t in txs]
-    new_canon = canonicalize_rows(rows, req.mapping)
+    new_canon = canonicalize_rows(rows, req.mapping, file_kind=ds.get("kind", "transaction"), filename=ds.get("filename", ""), headers=ds.get("headers", []))
     # Preserve row_ids and user edits — re-apply edited values
     for i, (orig, new) in enumerate(zip(txs, new_canon)):
         new["row_id"] = orig["row_id"]
@@ -310,46 +334,143 @@ async def update_transaction(row_id: str, req: RowUpdateRequest, user=Depends(_u
 # ---------- Analytics Routes ----------
 @api.get("/analytics/overview")
 async def analytics_overview(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
-    txs = await _get_transactions(user["id"], dataset_id)
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
     return overview_kpis(txs)
 
 
 @api.get("/analytics/customers")
 async def analytics_customers(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
-    txs = await _get_transactions(user["id"], dataset_id)
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
     return customer_analytics(txs)
 
 
 @api.get("/analytics/products")
 async def analytics_products(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
-    txs = await _get_transactions(user["id"], dataset_id)
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
     return product_analytics(txs)
 
 
 @api.get("/analytics/countries")
 async def analytics_countries(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
-    txs = await _get_transactions(user["id"], dataset_id)
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
     return country_analytics(txs)
 
 
 @api.get("/analytics/trends")
 async def analytics_trends(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
-    txs = await _get_transactions(user["id"], dataset_id)
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
     return trend_analytics(txs)
 
 
 @api.get("/analytics/salespersons")
 async def analytics_salespersons(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
-    txs = await _get_transactions(user["id"], dataset_id)
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
     targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
     return salesperson_analytics(txs, targets)
 
 
 @api.get("/analytics/alerts")
 async def analytics_alerts(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
-    txs = await _get_transactions(user["id"], dataset_id)
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
     targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
     return {"alerts": smart_alerts(txs, targets)}
+
+
+# ---------- Executive Dashboards ----------
+@api.get("/analytics/executive/ceo")
+async def executive_ceo(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
+    return ceo_dashboard(txs, targets)
+
+
+@api.get("/analytics/executive/sales_director")
+async def executive_sd(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
+    return sales_director_dashboard(txs, targets)
+
+
+@api.get("/analytics/executive/finance")
+async def executive_finance(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
+    return finance_dashboard(txs, targets)
+
+
+# ---------- Reports Export ----------
+def _stream(bytes_data: bytes, media_type: str, filename: str):
+    return StreamingResponse(
+        io.BytesIO(bytes_data),
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@api.get("/reports/customers.xlsx")
+async def report_customers_xlsx(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    data = customer_analytics(txs)
+    return _stream(build_customer_report_excel(data),
+                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                   "customer_report.xlsx")
+
+
+@api.get("/reports/products.xlsx")
+async def report_products_xlsx(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    data = product_analytics(txs)
+    return _stream(build_product_report_excel(data),
+                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                   "product_report.xlsx")
+
+
+@api.get("/reports/countries.xlsx")
+async def report_countries_xlsx(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    data = country_analytics(txs)
+    return _stream(build_country_report_excel(data),
+                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                   "country_report.xlsx")
+
+
+@api.get("/reports/ceo.pdf")
+async def report_ceo_pdf(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
+    data = ceo_dashboard(txs, targets)
+    return _stream(build_ceo_pdf(data), "application/pdf", "ceo_dashboard.pdf")
+
+
+@api.get("/reports/sales_director.pdf")
+async def report_sd_pdf(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    targets = await db.targets.find({"user_id": user["id"]}, {"_id": 0}).to_list(length=None)
+    data = sales_director_dashboard(txs, targets)
+    return _stream(build_sales_director_pdf(data), "application/pdf", "sales_director_dashboard.pdf")
+
+
+@api.get("/reports/finance.pdf")
+async def report_finance_pdf(dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    data = finance_dashboard(txs)
+    return _stream(build_finance_pdf(data), "application/pdf", "finance_dashboard.pdf")
 
 
 # ---------- Targets ----------

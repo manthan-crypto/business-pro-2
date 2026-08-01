@@ -4,9 +4,12 @@ import { SectionTitle, KpiCard, EmptyState, Badge } from "../components/Primitiv
 import { fmtINR, fmtNum, fmtPct } from "../lib/api";
 import { Users, UserPlus, UserX, Clock, TrendingUp, TrendingDown } from "lucide-react";
 import { useDatasets } from "../context/DatasetContext";
+import ExportBar from "../components/ExportBar";
+import DatasetSelector from "../components/DatasetSelector";
 
 export default function CustomersPage() {
   const { active } = useDatasets();
+  const [scope, setScope] = useState("active");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("top20");
@@ -15,8 +18,9 @@ export default function CustomersPage() {
   useEffect(() => {
     if (!active) { setLoading(false); return; }
     setLoading(true);
-    api.get("/analytics/customers").then((r) => setData(r.data)).finally(() => setLoading(false));
-  }, [active?.id]);
+    const params = scope === "all" ? { dataset_id: "all" } : {};
+    api.get("/analytics/customers", { params }).then((r) => setData(r.data)).finally(() => setLoading(false));
+  }, [active?.id, scope]);
 
   if (!active) return <EmptyState title="No dataset" description="Upload data to see customer analytics." />;
   if (loading || !data) return <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Loading...</div>;
@@ -30,10 +34,16 @@ export default function CustomersPage() {
     { id: "lost", label: `Lost (${data.lost_customers.length})` },
     { id: "dormant", label: `Dormant (${data.dormant_customers.length})` },
   ];
+  const scopeParam = scope === "all" ? "?dataset_id=all" : "";
 
   return (
     <div className="space-y-8">
-      <SectionTitle sub={`${data.total_customers} unique customers`}>Customer Analytics</SectionTitle>
+      <SectionTitle sub={`${data.total_customers} unique customers`} action={
+        <div className="flex gap-2">
+          <DatasetSelector scope={scope} setScope={setScope} />
+          <ExportBar xlsxUrl={`/reports/customers.xlsx${scopeParam}`} filename="customers.xlsx" testid="export-customers" />
+        </div>
+      }>Customer Analytics</SectionTitle>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard testid="cust-kpi-total" label="Total Customers" value={fmtNum(data.total_customers)} icon={Users} />
