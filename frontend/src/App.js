@@ -1,56 +1,46 @@
-import { useEffect } from "react";
+import React from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import { AuthProvider } from "@/context/AuthContext";
+import AppLayout from "@/components/AppLayout";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
+import OverviewPage from "@/pages/OverviewPage";
+import UploadPage from "@/pages/UploadPage";
+import CustomersPage from "@/pages/CustomersPage";
+import ProductsPage from "@/pages/ProductsPage";
+import CountriesPage from "@/pages/CountriesPage";
+import TrendsPage from "@/pages/TrendsPage";
+import SalespersonsPage from "@/pages/SalespersonsPage";
+import AlertsPage from "@/pages/AlertsPage";
+import DataEditorPage from "@/pages/DataEditorPage";
+import TargetsPage from "@/pages/TargetsPage";
+import DatasetsPage from "@/pages/DatasetsPage";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
+export default function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<OverviewPage />} />
+              <Route path="/upload" element={<UploadPage />} />
+              <Route path="/customers" element={<CustomersPage />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/countries" element={<CountriesPage />} />
+              <Route path="/trends" element={<TrendsPage />} />
+              <Route path="/salespersons" element={<SalespersonsPage />} />
+              <Route path="/alerts" element={<AlertsPage />} />
+              <Route path="/data-editor" element={<DataEditorPage />} />
+              <Route path="/targets" element={<TargetsPage />} />
+              <Route path="/datasets" element={<DatasetsPage />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </div>
   );
 }
-
-export default App;
