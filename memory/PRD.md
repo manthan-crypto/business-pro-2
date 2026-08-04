@@ -75,3 +75,23 @@ Build a Sales MIS app that ingests Excel of customer-wise / product-wise / month
   - Auto-detected from Excel columns; manually mappable via Datasets page
   - Finance dashboard automatically switches from "Country-wise (proxy)" to true "Currency-wise" grouping when the field is mapped
   - Helpful tip banner shown when currency field is not detected
+
+## Update — Customer × Month Pivot Analysis (2026-08-04)
+
+### Added
+- **Customer × Month Analysis page** (`/customer-monthly`): Wide pivot table with one row per customer and one column per month showing net sales (or GP)
+  - Sticky first column (Customer)
+  - Fiscal Year filter, Sales/GP metric toggle, search across customer/country/salesperson
+  - Sortable by any column including individual months
+  - Active-Months badge (e.g., 3/3 = ordered every month)
+  - Column totals footer + Grand total in header
+  - Excel export (2-sheet: Sales pivot + GP pivot)
+- Backend: `pivot.py` with `customer_month_pivot(txs, fy=None)`
+- Endpoints:
+  - `GET /api/analytics/customer-month-pivot?dataset_id=[all|<id>]&fy=<int>`
+  - `GET /api/reports/customer_month_pivot.xlsx?...`
+
+### Verified
+- Merged view (outward + Top-N summary) → 112 customers × 3 months, ₹53.06 Cr grand total
+- Top-N-Summary alone → 112 customers × 3 months, ₹25.34 Cr
+- Excel export returns valid .xlsx (20 KB)

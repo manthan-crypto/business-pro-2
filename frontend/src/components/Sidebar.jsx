@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Upload, Users, Package, Globe, TrendingUp,
   UserCheck, Bell, Pencil, Target, LogOut, Activity, Database,
-  Crown, Compass, Wallet, Calendar,
+  Crown, Compass, Wallet, Calendar, CalendarRange,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useDatasets } from "../context/DatasetContext";
@@ -18,6 +18,7 @@ const NAV = [
   { to: "/countries", label: "Countries", icon: Globe, testid: "nav-countries" },
   { to: "/trends", label: "Trends", icon: TrendingUp, testid: "nav-trends" },
   { to: "/quarterly", label: "Quarterly (QBR)", icon: Calendar, testid: "nav-quarterly" },
+  { to: "/customer-monthly", label: "Customer × Month", icon: CalendarRange, testid: "nav-customer-monthly" },
   { to: "/salespersons", label: "Sales Team", icon: UserCheck, testid: "nav-salespersons" },
   { to: "/alerts", label: "Smart Alerts", icon: Bell, testid: "nav-alerts" },
   { section: "EXECUTIVE" },
