@@ -22,6 +22,10 @@ import SalesDirectorDashboardPage from "@/pages/SalesDirectorDashboardPage";
 import FinanceDashboardPage from "@/pages/FinanceDashboardPage";
 import QuarterlyPage from "@/pages/QuarterlyPage";
 import CustomerMonthlyPage from "@/pages/CustomerMonthlyPage";
+import ProductMonthlyPage from "@/pages/ProductMonthlyPage";
+import CustomerSalespersonPage from "@/pages/CustomerSalespersonPage";
+import AbcAnalysisPage from "@/pages/AbcAnalysisPage";
+import MonthComparePage from "@/pages/MonthComparePage";
 
 export default function App() {
   return (
@@ -40,6 +44,10 @@ export default function App() {
               <Route path="/trends" element={<TrendsPage />} />
               <Route path="/quarterly" element={<QuarterlyPage />} />
               <Route path="/customer-monthly" element={<CustomerMonthlyPage />} />
+              <Route path="/product-monthly" element={<ProductMonthlyPage />} />
+              <Route path="/customer-salesperson" element={<CustomerSalespersonPage />} />
+              <Route path="/abc" element={<AbcAnalysisPage />} />
+              <Route path="/compare" element={<MonthComparePage />} />
               <Route path="/salespersons" element={<SalespersonsPage />} />
               <Route path="/alerts" element={<AlertsPage />} />
               <Route path="/ceo" element={<CeoDashboardPage />} />

@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Upload, Users, Package, Globe, TrendingUp,
   UserCheck, Bell, Pencil, Target, LogOut, Activity, Database,
-  Crown, Compass, Wallet, Calendar, CalendarRange,
+  Crown, Compass, Wallet, Calendar, CalendarRange, UsersRound, Award, ArrowLeftRight,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useDatasets } from "../context/DatasetContext";
@@ -18,9 +18,14 @@ const NAV = [
   { to: "/countries", label: "Countries", icon: Globe, testid: "nav-countries" },
   { to: "/trends", label: "Trends", icon: TrendingUp, testid: "nav-trends" },
   { to: "/quarterly", label: "Quarterly (QBR)", icon: Calendar, testid: "nav-quarterly" },
-  { to: "/customer-monthly", label: "Customer × Month", icon: CalendarRange, testid: "nav-customer-monthly" },
   { to: "/salespersons", label: "Sales Team", icon: UserCheck, testid: "nav-salespersons" },
   { to: "/alerts", label: "Smart Alerts", icon: Bell, testid: "nav-alerts" },
+  { section: "PIVOTS & TIERING" },
+  { to: "/customer-monthly", label: "Customer × Month", icon: CalendarRange, testid: "nav-customer-monthly" },
+  { to: "/product-monthly", label: "Product × Month", icon: Package, testid: "nav-product-monthly" },
+  { to: "/customer-salesperson", label: "Customer × SP", icon: UsersRound, testid: "nav-customer-sp" },
+  { to: "/abc", label: "ABC Analysis", icon: Award, testid: "nav-abc" },
+  { to: "/compare", label: "Compare Months", icon: ArrowLeftRight, testid: "nav-compare" },
   { section: "EXECUTIVE" },
   { to: "/ceo", label: "CEO Dashboard", icon: Crown, testid: "nav-ceo" },
   { to: "/sales-director", label: "Sales Director", icon: Compass, testid: "nav-sd" },

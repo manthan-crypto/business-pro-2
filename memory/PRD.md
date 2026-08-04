@@ -95,3 +95,16 @@ Build a Sales MIS app that ingests Excel of customer-wise / product-wise / month
 - Merged view (outward + Top-N summary) → 112 customers × 3 months, ₹53.06 Cr grand total
 - Top-N-Summary alone → 112 customers × 3 months, ₹25.34 Cr
 - Excel export returns valid .xlsx (20 KB)
+
+## Update — Pivots, ABC Tiering & Month Compare (2026-08-04)
+
+### Added 4 new modules
+- **Product × Month** (`/product-monthly`): Wide pivot with sales/qty/GP toggle, trend arrows (last vs first month), filters for surged/declined/dead products
+- **Customer × Salesperson** (`/customer-salesperson`): Grid showing revenue split by salesperson per customer, primary owner highlighted, per-SP summary cards, shared-by count
+- **ABC Customer Analysis** (`/abc`): Pareto tiering — A (top 80%), B (next 15%), C (last 5%). Verified: 25 A-tier customers = 79.27% revenue. Pareto curve chart + per-tier customer/sales breakdown
+- **Compare Months** (`/compare`): Side-by-side month picker with status classification (NEW/LOST/SURGED ≥20%/DROPPED ≥20%/STABLE), growth arrows, status count cards, entity toggle (customers vs products)
+
+### Backend
+- Extended `pivot.py` with `product_month_pivot`, `customer_salesperson_pivot`, `abc_analysis`, `month_compare`
+- 4 new endpoints under `/api/analytics/*`
+- Sidebar reorganised: new "PIVOTS & TIERING" section

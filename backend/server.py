@@ -29,7 +29,7 @@ from analytics import (
 )
 from executive import ceo_dashboard, sales_director_dashboard, finance_dashboard
 from quarterly import quarterly_analytics
-from pivot import customer_month_pivot
+from pivot import customer_month_pivot, product_month_pivot, customer_salesperson_pivot, abc_analysis, month_compare
 from reports import (
     build_customer_report_excel, build_product_report_excel, build_country_report_excel,
     build_ceo_pdf, build_sales_director_pdf, build_finance_pdf,
@@ -427,6 +427,51 @@ async def analytics_customer_month_pivot(
     ds_id, merged = _parse_merged_flag(dataset_id)
     txs = await _get_transactions(user["id"], ds_id, merged)
     return customer_month_pivot(txs, fy=fy)
+
+
+@api.get("/analytics/product-month-pivot")
+async def analytics_product_month_pivot(
+    dataset_id: Optional[str] = None,
+    fy: Optional[int] = None,
+    user=Depends(_user_dep),
+):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    return product_month_pivot(txs, fy=fy)
+
+
+@api.get("/analytics/customer-salesperson-pivot")
+async def analytics_cust_sp_pivot(
+    dataset_id: Optional[str] = None,
+    fy: Optional[int] = None,
+    user=Depends(_user_dep),
+):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    return customer_salesperson_pivot(txs, fy=fy)
+
+
+@api.get("/analytics/abc")
+async def analytics_abc(
+    dataset_id: Optional[str] = None,
+    fy: Optional[int] = None,
+    user=Depends(_user_dep),
+):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    return abc_analysis(txs, fy=fy)
+
+
+@api.get("/analytics/month-compare")
+async def analytics_month_compare(
+    month_a: str,
+    month_b: str,
+    dataset_id: Optional[str] = None,
+    user=Depends(_user_dep),
+):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    return month_compare(txs, month_a, month_b)
 
 
 @api.get("/reports/customer_month_pivot.xlsx")
