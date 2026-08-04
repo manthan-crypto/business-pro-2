@@ -6,6 +6,7 @@ import { Users, UserPlus, UserX, Clock, TrendingUp, TrendingDown } from "lucide-
 import { useDatasets } from "../context/DatasetContext";
 import ExportBar from "../components/ExportBar";
 import DatasetSelector from "../components/DatasetSelector";
+import { CustomerLink } from "../components/CustomerDrawerContext";
 
 export default function CustomersPage() {
   const { active } = useDatasets();
@@ -132,7 +133,7 @@ function CustomerTable({ rows }) {
         {rows.map((r, i) => (
           <tr key={r.customer}>
             <td className="mono text-slate-500">{i + 1}</td>
-            <td className="font-bold">{r.customer}</td>
+            <td className="font-bold"><CustomerLink name={r.customer} /></td>
             <td>{r.country || "—"}</td>
             <td className="mono text-right">{fmtINR(r.sales)}</td>
             <td className="mono text-right">{fmtINR(r.gp)}</td>
@@ -164,7 +165,7 @@ function GrowthTable({ rows }) {
       <tbody>
         {rows.map((r) => (
           <tr key={r.customer}>
-            <td className="font-bold">{r.customer}</td>
+            <td className="font-bold"><CustomerLink name={r.customer} /></td>
             <td className="mono text-right">{fmtINR(r.previous)}</td>
             <td className="mono text-right">{fmtINR(r.current)}</td>
             <td className={`mono text-right ${r.change >= 0 ? "text-emerald-700" : "text-red-700"}`}>{fmtINR(r.change)}</td>
@@ -181,7 +182,7 @@ function SimpleList({ items, empty }) {
   return (
     <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
       {items.map((c) => (
-        <div key={c} className="border border-slate-200 px-3 py-2 text-sm font-bold bg-slate-50">{c}</div>
+        <div key={c} className="border border-slate-200 px-3 py-2 text-sm font-bold bg-slate-50"><CustomerLink name={c} /></div>
       ))}
     </div>
   );
@@ -201,7 +202,7 @@ function DormantTable({ rows }) {
       <tbody>
         {rows.map((r) => (
           <tr key={r.customer}>
-            <td className="font-bold">{r.customer}</td>
+            <td className="font-bold"><CustomerLink name={r.customer} /></td>
             <td className="mono text-xs">{r.last_purchase}</td>
             <td className="mono text-right">
               <Badge variant={r.days_since > 180 ? "danger" : "warning"}>{r.days_since}d</Badge>

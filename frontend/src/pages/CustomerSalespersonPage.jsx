@@ -4,6 +4,8 @@ import { SectionTitle, EmptyState, Badge } from "../components/Primitives";
 import { fmtINR, fmtPct } from "../lib/api";
 import { useDatasets } from "../context/DatasetContext";
 import DatasetSelector from "../components/DatasetSelector";
+import ExportBar from "../components/ExportBar";
+import { CustomerLink } from "../components/CustomerDrawerContext";
 import { UsersRound, Search } from "lucide-react";
 
 export default function CustomerSalespersonPage() {
@@ -35,7 +37,10 @@ export default function CustomerSalespersonPage() {
   return (
     <div className="space-y-8">
       <SectionTitle sub={`${data.customers} customers × ${data.salespersons.length} salespersons  ·  Grand ${fmtINR(data.grand_total)}`} action={
-        <DatasetSelector scope={scope} setScope={setScope} />
+        <div className="flex gap-2">
+          <DatasetSelector scope={scope} setScope={setScope} />
+          <ExportBar xlsxUrl={`/reports/customer_salesperson_pivot.xlsx${scope === "all" ? "?dataset_id=all" : ""}`} filename="customer_salesperson_pivot.xlsx" testid="export-cs" />
+        </div>
       }>
         <div className="flex items-center gap-2"><UsersRound className="w-5 h-5 text-[#002FA7]" /> Customer × Salesperson Grid</div>
       </SectionTitle>
@@ -85,7 +90,7 @@ export default function CustomerSalespersonPage() {
             {filtered.slice(0, 300).map((r, i) => (
               <tr key={r.customer}>
                 <td className="font-bold text-xs" style={{ position:"sticky", left:0, background:"white", zIndex:1 }}>
-                  <span className="text-slate-400 mono mr-2">{i + 1}</span>{r.customer}
+                  <span className="text-slate-400 mono mr-2">{i + 1}</span><CustomerLink name={r.customer} />
                 </td>
                 <td className="text-xs">{r.country || "—"}</td>
                 <td className="text-xs font-bold">{r.owner}</td>

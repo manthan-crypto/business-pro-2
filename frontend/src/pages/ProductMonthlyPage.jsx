@@ -4,6 +4,7 @@ import { SectionTitle, EmptyState, Badge } from "../components/Primitives";
 import { fmtINR, fmtNum, fmtPct } from "../lib/api";
 import { useDatasets } from "../context/DatasetContext";
 import DatasetSelector from "../components/DatasetSelector";
+import ExportBar from "../components/ExportBar";
 import { Package, Search, TrendingUp, TrendingDown } from "lucide-react";
 
 const MONTH_LABEL = { "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May", "06": "Jun", "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec" };
@@ -50,7 +51,10 @@ export default function ProductMonthlyPage() {
   return (
     <div className="space-y-8">
       <SectionTitle sub={`${data.products} products × ${data.months.length} months  ·  Grand ${fmt(data[metric === "gp" ? "grand_gp" : metric === "qty" ? "grand_qty" : "grand_total"])}`} action={
-        <DatasetSelector scope={scope} setScope={setScope} />
+        <div className="flex gap-2">
+          <DatasetSelector scope={scope} setScope={setScope} />
+          <ExportBar xlsxUrl={`/reports/product_month_pivot.xlsx?${scope === "all" ? "dataset_id=all&" : ""}${fy ? `fy=${fy}` : ""}`} filename={`product_month_pivot${fy ? `_fy${fy}` : ""}.xlsx`} testid="export-product-pivot" />
+        </div>
       }>
         <div className="flex items-center gap-2"><Package className="w-5 h-5 text-[#002FA7]" /> Product × Month Analysis</div>
       </SectionTitle>

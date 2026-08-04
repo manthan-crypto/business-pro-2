@@ -30,6 +30,7 @@ from analytics import (
 from executive import ceo_dashboard, sales_director_dashboard, finance_dashboard
 from quarterly import quarterly_analytics
 from pivot import customer_month_pivot, product_month_pivot, customer_salesperson_pivot, abc_analysis, month_compare
+from customer_detail import customer_360
 from reports import (
     build_customer_report_excel, build_product_report_excel, build_country_report_excel,
     build_ceo_pdf, build_sales_director_pdf, build_finance_pdf,
@@ -472,6 +473,108 @@ async def analytics_month_compare(
     ds_id, merged = _parse_merged_flag(dataset_id)
     txs = await _get_transactions(user["id"], ds_id, merged)
     return month_compare(txs, month_a, month_b)
+
+
+@api.get("/analytics/customer/{customer_name}")
+async def analytics_customer_360(customer_name: str, dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    from urllib.parse import unquote
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    return customer_360(txs, unquote(customer_name))
+
+
+# ---------- Pivot Excel Exports ----------
+def _pivot_to_sheets(pv, key_field, month_key="months"):
+    sales_sheet = []
+    for r in pv["rows"]:
+        row = {key_field.title(): r[key_field]}
+        for extra in ("country", "category", "manufacturer", "salesperson"):
+            if extra in r:
+                row[extra.title()] = r.get(extra)
+        for ym in pv["months"]:
+            row[ym] = r[month_key].get(ym, 0)
+        row["Total Sales"] = r.get("total_sales", 0)
+        row["GP Amount"] = r.get("total_gp", 0)
+        row["GP %"] = r.get("gp_pct", 0)
+        if "contribution_pct" in r:
+            row["Contribution %"] = r["contribution_pct"]
+        sales_sheet.append(row)
+    return sales_sheet
+
+
+@api.get("/reports/product_month_pivot.xlsx")
+async def report_prod_pivot_xlsx(dataset_id: Optional[str] = None, fy: Optional[int] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    pv = product_month_pivot(txs, fy=fy)
+    from reports import export_excel
+    sheets = {
+        "Sales Pivot": _pivot_to_sheets(pv, "product", "months"),
+        "Qty Pivot": _pivot_to_sheets(pv, "product", "months_qty"),
+        "GP Pivot": _pivot_to_sheets(pv, "product", "months_gp"),
+    }
+    return _stream(export_excel(sheets, "Product × Month Pivot"),
+                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                   f"product_month_pivot{('_fy' + str(fy)) if fy else ''}.xlsx")
+
+
+@api.get("/reports/customer_salesperson_pivot.xlsx")
+async def report_cs_pivot_xlsx(dataset_id: Optional[str] = None, fy: Optional[int] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    pv = customer_salesperson_pivot(txs, fy=fy)
+    rows = []
+    for r in pv["rows"]:
+        row = {"Customer": r["customer"], "Country": r["country"], "Owner": r["owner"], "Shared By": r["shared_by"]}
+        for sp in pv["salespersons"]:
+            row[sp] = r["cells"].get(sp, 0)
+        row["Total"] = r["total_sales"]
+        row["Contribution %"] = r["contribution_pct"]
+        rows.append(row)
+    # column totals row
+    totals_row = {"Customer": "TOTALS", "Country": "", "Owner": "", "Shared By": ""}
+    for sp in pv["salespersons"]:
+        totals_row[sp] = pv["col_totals"].get(sp, 0)
+    totals_row["Total"] = pv["grand_total"]
+    totals_row["Contribution %"] = 100
+    rows.append(totals_row)
+    from reports import export_excel
+    return _stream(export_excel({"Customer × Salesperson": rows}, "Customer × Salesperson Pivot"),
+                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                   "customer_salesperson_pivot.xlsx")
+
+
+@api.get("/reports/abc.xlsx")
+async def report_abc_xlsx(dataset_id: Optional[str] = None, fy: Optional[int] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    abc = abc_analysis(txs, fy=fy)
+    tier_rows = [{"Tier": t, **v} for t, v in abc["tiers"].items()]
+    from reports import export_excel
+    return _stream(export_excel({
+        "Tier Summary": tier_rows,
+        "Customers": abc["rows"],
+        "Tier A": [r for r in abc["rows"] if r["tier"] == "A"],
+        "Tier B": [r for r in abc["rows"] if r["tier"] == "B"],
+        "Tier C": [r for r in abc["rows"] if r["tier"] == "C"],
+    }, "ABC Customer Analysis"),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "abc_analysis.xlsx")
+
+
+@api.get("/reports/month_compare.xlsx")
+async def report_month_compare_xlsx(month_a: str, month_b: str, dataset_id: Optional[str] = None, user=Depends(_user_dep)):
+    ds_id, merged = _parse_merged_flag(dataset_id)
+    txs = await _get_transactions(user["id"], ds_id, merged)
+    cmp = month_compare(txs, month_a, month_b)
+    from reports import export_excel
+    return _stream(export_excel({
+        "Customers": cmp["customers"],
+        "Products": cmp["products"],
+        "Summary": [{"Metric": k, "Value": v} for k, v in cmp["summary"].items()],
+    }, f"Month Compare {month_a} vs {month_b}"),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        f"month_compare_{month_a}_vs_{month_b}.xlsx")
 
 
 @api.get("/reports/customer_month_pivot.xlsx")

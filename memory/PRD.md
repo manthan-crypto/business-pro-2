@@ -108,3 +108,27 @@ Build a Sales MIS app that ingests Excel of customer-wise / product-wise / month
 - Extended `pivot.py` with `product_month_pivot`, `customer_salesperson_pivot`, `abc_analysis`, `month_compare`
 - 4 new endpoints under `/api/analytics/*`
 - Sidebar reorganised: new "PIVOTS & TIERING" section
+
+## Update — Customer 360° + Excel Exports on Pivots (2026-08-04)
+
+### Added
+- **Customer 360° Drawer** (`CustomerDrawer.jsx` + `CustomerDrawerContext.jsx`): Click any customer name anywhere in the app to open a right-side drawer with:
+  - Location, first/last purchase meta
+  - KPIs: total sales, GP, orders, AOV, products count, active months
+  - Monthly bar chart (sales + GP)
+  - Salesperson history table (with share %, first/last order)
+  - Category mix donut chart (top 8 + "N more")
+  - Product Mix table (top 30)
+  - Recent 20 transactions
+- Wired `<CustomerLink>` on: Overview (top-5 + growth leaders/decliners), Customers page (all 4 tables), Customer × Month, Customer × Salesperson, ABC, Compare Months
+- Backend endpoint: `GET /api/analytics/customer/{customer_name}?dataset_id=[all|<id>]`
+
+### Excel Exports on Pivots
+- ProductMonthly page: Excel export (3 sheets: Sales, Qty, GP pivots) via `/api/reports/product_month_pivot.xlsx`
+- CustomerSalesperson page: Excel with SP columns + totals row via `/api/reports/customer_salesperson_pivot.xlsx`
+- ABC page: Excel with tier summary + per-tier sheets via `/api/reports/abc.xlsx`
+- Compare Months page: Excel with customers/products/summary via `/api/reports/month_compare.xlsx`
+
+### Verified
+- Customer 360 for ARC GLOBAL FZC returns 402 orders, 140 products, ₹3.96 Cr (from outward.xls scope)
+- All 4 pivot xlsx endpoints return HTTP 200 with valid file sizes (13-450 KB)

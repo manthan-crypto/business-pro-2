@@ -5,6 +5,7 @@ import { fmtINR, fmtPct } from "../lib/api";
 import { useDatasets } from "../context/DatasetContext";
 import ExportBar from "../components/ExportBar";
 import DatasetSelector from "../components/DatasetSelector";
+import { CustomerLink } from "../components/CustomerDrawerContext";
 import { CalendarRange, Search } from "lucide-react";
 
 const MONTH_LABEL = { "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May", "06": "Jun", "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec" };
@@ -139,7 +140,7 @@ export default function CustomerMonthlyPage() {
               {filteredRows.map((r, i) => (
                 <tr key={r.customer}>
                   <td className="font-bold text-xs" style={{ position: "sticky", left: 0, background: "white", zIndex: 1 }}>
-                    <span className="text-slate-400 mono mr-2">{i + 1}</span>{r.customer}
+                    <span className="text-slate-400 mono mr-2">{i + 1}</span><CustomerLink name={r.customer} />
                   </td>
                   <td className="text-xs">{r.country || "—"}</td>
                   <td className="text-xs">{r.salesperson || "—"}</td>

@@ -4,6 +4,8 @@ import { SectionTitle, EmptyState, Badge, KpiCard } from "../components/Primitiv
 import { fmtINR, fmtNum, fmtPct } from "../lib/api";
 import { useDatasets } from "../context/DatasetContext";
 import DatasetSelector from "../components/DatasetSelector";
+import ExportBar from "../components/ExportBar";
+import { CustomerLink } from "../components/CustomerDrawerContext";
 import { Award, Search } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, Legend } from "recharts";
 
@@ -44,7 +46,10 @@ export default function AbcAnalysisPage() {
   return (
     <div className="space-y-8">
       <SectionTitle sub={`Pareto tiering — ${data.total_customers} customers · ${fmtINR(data.total_sales)}`} action={
-        <DatasetSelector scope={scope} setScope={setScope} />
+        <div className="flex gap-2">
+          <DatasetSelector scope={scope} setScope={setScope} />
+          <ExportBar xlsxUrl={`/reports/abc.xlsx${scope === "all" ? "?dataset_id=all" : ""}`} filename="abc_analysis.xlsx" testid="export-abc" />
+        </div>
       }>
         <div className="flex items-center gap-2"><Award className="w-5 h-5 text-[#002FA7]" /> ABC Customer Analysis</div>
       </SectionTitle>
@@ -145,7 +150,7 @@ export default function AbcAnalysisPage() {
             {filtered.map((r, i) => (
               <tr key={r.customer} className={TIER_STYLES[r.tier].bg}>
                 <td className="mono text-slate-500">{i + 1}</td>
-                <td className="font-bold text-xs">{r.customer}</td>
+                <td className="font-bold text-xs"><CustomerLink name={r.customer} /></td>
                 <td className="text-xs">{r.country || "—"}</td>
                 <td className="text-xs">{r.salesperson || "—"}</td>
                 <td className="mono text-right">{fmtINR(r.sales)}</td>

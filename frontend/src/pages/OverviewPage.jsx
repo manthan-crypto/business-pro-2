@@ -6,6 +6,7 @@ import { useDatasets } from "../context/DatasetContext";
 import { KpiCard, SectionTitle, EmptyState, Badge } from "../components/Primitives";
 import { fmtINR, fmtNum, fmtPct } from "../lib/api";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
+import { CustomerLink } from "../components/CustomerDrawerContext";
 
 export default function OverviewPage() {
   const { active } = useDatasets();
@@ -117,7 +118,7 @@ export default function OverviewPage() {
               <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-2 flex items-center gap-1"><ArrowUpRight className="w-3 h-3" /> Top Risers</div>
               {(cust?.growth || []).slice(0, 5).map((g) => (
                 <div key={g.customer} className="py-1.5 border-b border-slate-100 last:border-0">
-                  <div className="text-xs font-bold truncate">{g.customer}</div>
+                  <div className="text-xs font-bold truncate"><CustomerLink name={g.customer} /></div>
                   <div className="text-[11px] mono text-emerald-700">+{g.growth_pct.toFixed(1)}%</div>
                 </div>
               ))}
@@ -126,7 +127,7 @@ export default function OverviewPage() {
               <div className="text-[10px] font-bold uppercase tracking-wider text-red-700 mb-2 flex items-center gap-1"><ArrowDownRight className="w-3 h-3" /> Top Decliners</div>
               {(cust?.growth || []).slice(-5).reverse().map((g) => (
                 <div key={g.customer} className="py-1.5 border-b border-slate-100 last:border-0">
-                  <div className="text-xs font-bold truncate">{g.customer}</div>
+                  <div className="text-xs font-bold truncate"><CustomerLink name={g.customer} /></div>
                   <div className="text-[11px] mono text-red-700">{g.growth_pct.toFixed(1)}%</div>
                 </div>
               ))}

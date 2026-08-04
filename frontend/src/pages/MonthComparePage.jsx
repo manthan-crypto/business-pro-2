@@ -4,6 +4,8 @@ import { SectionTitle, EmptyState, Badge, KpiCard } from "../components/Primitiv
 import { fmtINR, fmtNum } from "../lib/api";
 import { useDatasets } from "../context/DatasetContext";
 import DatasetSelector from "../components/DatasetSelector";
+import ExportBar from "../components/ExportBar";
+import { CustomerLink } from "../components/CustomerDrawerContext";
 import { ArrowLeftRight, TrendingUp, TrendingDown, Sparkles, XCircle, Search } from "lucide-react";
 
 const STATUS_STYLES = {
@@ -69,7 +71,10 @@ export default function MonthComparePage() {
   return (
     <div className="space-y-8">
       <SectionTitle sub="Side-by-side month comparison with growth arrows" action={
-        <DatasetSelector scope={scope} setScope={setScope} />
+        <div className="flex gap-2">
+          <DatasetSelector scope={scope} setScope={setScope} />
+          <ExportBar xlsxUrl={monthA && monthB ? `/reports/month_compare.xlsx?month_a=${monthA}&month_b=${monthB}${scope === "all" ? "&dataset_id=all" : ""}` : null} filename={`month_compare_${monthA}_vs_${monthB}.xlsx`} testid="export-compare" />
+        </div>
       }>
         <div className="flex items-center gap-2"><ArrowLeftRight className="w-5 h-5 text-[#002FA7]" /> Compare Two Months</div>
       </SectionTitle>
@@ -171,7 +176,7 @@ export default function MonthComparePage() {
                   return (
                     <tr key={r[entity]}>
                       <td className="mono text-slate-500">{i + 1}</td>
-                      <td className="font-bold text-xs">{r[entity]}</td>
+                      <td className="font-bold text-xs">{entity === "customer" ? <CustomerLink name={r[entity]} /> : r[entity]}</td>
                       <td className="text-xs">{entity === "customer" ? (r.country || "—") : (r.category || "—")}</td>
                       <td className="mono text-right">{fmtINR(r.sales_a)}</td>
                       <td className="mono text-right">{fmtINR(r.sales_b)}</td>
