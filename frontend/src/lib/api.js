@@ -8,6 +8,18 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Attach Bearer token from localStorage as fallback (in case httpOnly cookies fail).
+api.interceptors.request.use((config) => {
+  try {
+    const t = localStorage.getItem("access_token");
+    if (t) {
+      config.headers = config.headers || {};
+      if (!config.headers.Authorization) config.headers.Authorization = `Bearer ${t}`;
+    }
+  } catch (e) { /* localStorage may be unavailable */ }
+  return config;
+});
+
 export default api;
 
 export function formatApiError(err) {

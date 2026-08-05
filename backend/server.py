@@ -139,7 +139,7 @@ async def register(req: RegisterRequest, response: Response):
     access = create_access_token(uid, email)
     refresh = create_refresh_token(uid)
     set_auth_cookies(response, access, refresh)
-    return {"id": uid, "email": email, "name": doc["name"], "role": doc["role"]}
+    return {"id": uid, "email": email, "name": doc["name"], "role": doc["role"], "access_token": access}
 
 
 @api.post("/auth/login")
@@ -152,7 +152,7 @@ async def login(req: LoginRequest, response: Response):
     access = create_access_token(uid, email)
     refresh = create_refresh_token(uid)
     set_auth_cookies(response, access, refresh)
-    return {"id": uid, "email": email, "name": user.get("name"), "role": user.get("role", "user")}
+    return {"id": uid, "email": email, "name": user.get("name"), "role": user.get("role", "user"), "access_token": access}
 
 
 @api.post("/auth/logout")
@@ -723,7 +723,6 @@ app.include_router(api)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
     allow_origin_regex=".*",
     allow_methods=["*"],
     allow_headers=["*"],

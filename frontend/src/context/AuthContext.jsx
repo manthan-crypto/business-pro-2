@@ -17,6 +17,9 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const { data } = await api.post("/auth/login", { email, password });
+      if (data.access_token) {
+        try { localStorage.setItem("access_token", data.access_token); } catch (e) {}
+      }
       setUser(data);
       return { ok: true };
     } catch (e) {
@@ -27,6 +30,9 @@ export function AuthProvider({ children }) {
   const register = async (email, password, name) => {
     try {
       const { data } = await api.post("/auth/register", { email, password, name });
+      if (data.access_token) {
+        try { localStorage.setItem("access_token", data.access_token); } catch (e) {}
+      }
       setUser(data);
       return { ok: true };
     } catch (e) {
@@ -36,6 +42,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try { await api.post("/auth/logout"); } catch (e) {}
+    try { localStorage.removeItem("access_token"); } catch (e) {}
     setUser(false);
   };
 
